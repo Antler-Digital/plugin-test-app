@@ -2,6 +2,7 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { analyticsPlugin } from 'payload-plugin-analytics'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -32,6 +33,12 @@ export default buildConfig({
   sharp,
   plugins: [
     payloadCloudPlugin(),
+    analyticsPlugin({
+      collections: {
+        users: true,
+        media: true,
+      },
+    }),
     // storage-adapter-placeholder
   ],
 })

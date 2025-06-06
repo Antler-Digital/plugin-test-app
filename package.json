@@ -12,7 +12,8 @@
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "restart": "pnpm update payload-plugin-analytics && pnpm generate:importmap"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "latest",
@@ -23,6 +24,7 @@
     "graphql": "^16.8.1",
     "next": "15.1.5",
     "payload": "latest",
+    "payload-plugin-analytics": "latest",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "sharp": "0.32.6"

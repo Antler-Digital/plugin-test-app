@@ -1,7 +1,7 @@
 {
   "name": "payload-test-app",
   "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
+  "description": "External Payload test app to test Antler plugins",
   "license": "MIT",
   "type": "module",
   "scripts": {

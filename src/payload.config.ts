@@ -34,10 +34,8 @@ export default buildConfig({
   plugins: [
     payloadCloudPlugin(),
     analyticsPlugin({
-      collections: {
-        users: true,
-        media: true,
-      },
+      maxAgeInDays: 90,
+      collectionSlug: 'analytics-v2',
     }),
     // storage-adapter-placeholder
   ],

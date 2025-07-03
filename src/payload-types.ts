@@ -68,8 +68,11 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
-    'analytics-events': AnalyticsEvent;
-    'analytics-sessions': AnalyticsSession;
+    'analytics-v2-events': AnalyticsV2Event;
+    'analytics-v2-sessions': AnalyticsV2Session;
+    'analytics-v2-hourly-aggregations': AnalyticsV2HourlyAggregation;
+    'analytics-v2-daily-aggregations': AnalyticsV2DailyAggregation;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -78,8 +81,11 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    'analytics-events': AnalyticsEventsSelect<false> | AnalyticsEventsSelect<true>;
-    'analytics-sessions': AnalyticsSessionsSelect<false> | AnalyticsSessionsSelect<true>;
+    'analytics-v2-events': AnalyticsV2EventsSelect<false> | AnalyticsV2EventsSelect<true>;
+    'analytics-v2-sessions': AnalyticsV2SessionsSelect<false> | AnalyticsV2SessionsSelect<true>;
+    'analytics-v2-hourly-aggregations': AnalyticsV2HourlyAggregationsSelect<false> | AnalyticsV2HourlyAggregationsSelect<true>;
+    'analytics-v2-daily-aggregations': AnalyticsV2DailyAggregationsSelect<false> | AnalyticsV2DailyAggregationsSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -94,7 +100,15 @@ export interface Config {
     collection: 'users';
   };
   jobs: {
-    tasks: unknown;
+    tasks: {
+      'analytics-v2_aggregate_hourly': TaskAnalyticsV2AggregateHourly;
+      'analytics-v2_aggregate_daily': TaskAnalyticsV2AggregateDaily;
+      'analytics-v2_cleanup_aggregations': TaskAnalyticsV2CleanupAggregations;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -154,30 +168,35 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "analytics-events".
+ * via the `definition` "analytics-v2-events".
  */
-export interface AnalyticsEvent {
+export interface AnalyticsV2Event {
   id: string;
   timestamp: string;
-  session_id: string | AnalyticsSession;
-  domain: string;
+  session_id: string | AnalyticsV2Session;
   path: string;
   query_params?: string | null;
-  referrer_url?: string | null;
-  ip_hash: string;
-  user_agent?: string | null;
-  device_type?: ('desktop' | 'mobile' | 'tablet') | null;
-  os?: string | null;
-  browser?: string | null;
-  country?: string | null;
+  event_type: 'page_view' | 'click' | 'form_submit' | 'custom';
+  /**
+   * Additional data for custom events
+   */
+  event_data?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "analytics-sessions".
+ * via the `definition` "analytics-v2-sessions".
  */
-export interface AnalyticsSession {
+export interface AnalyticsV2Session {
   id: string;
   ip_hash: string;
   domain: string;
@@ -189,6 +208,7 @@ export interface AnalyticsSession {
   browser?: string | null;
   country?: string | null;
   duration?: number | null;
+  referrer_url?: string | null;
   utm?: {
     source?: string | null;
     medium?: string | null;
@@ -196,6 +216,244 @@ export interface AnalyticsSession {
     term?: string | null;
     content?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-v2-hourly-aggregations".
+ */
+export interface AnalyticsV2HourlyAggregation {
+  id: string;
+  date: string;
+  hour: number;
+  total_sessions?: number | null;
+  total_events?: number | null;
+  unique_visitors?: number | null;
+  browsers?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  devices?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  operating_systems?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  countries?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  top_pages?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  utm_sources?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-v2-daily-aggregations".
+ */
+export interface AnalyticsV2DailyAggregation {
+  id: string;
+  date: string;
+  total_sessions?: number | null;
+  total_events?: number | null;
+  unique_visitors?: number | null;
+  browsers?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  devices?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  operating_systems?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  countries?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  top_pages?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  utm_sources?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: string;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug:
+          | 'inline'
+          | 'analytics-v2_aggregate_hourly'
+          | 'analytics-v2_aggregate_daily'
+          | 'analytics-v2_cleanup_aggregations';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?:
+    | (
+        | 'inline'
+        | 'analytics-v2_aggregate_hourly'
+        | 'analytics-v2_aggregate_daily'
+        | 'analytics-v2_cleanup_aggregations'
+      )
+    | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -215,12 +473,24 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
-        relationTo: 'analytics-events';
-        value: string | AnalyticsEvent;
+        relationTo: 'analytics-v2-events';
+        value: string | AnalyticsV2Event;
       } | null)
     | ({
-        relationTo: 'analytics-sessions';
-        value: string | AnalyticsSession;
+        relationTo: 'analytics-v2-sessions';
+        value: string | AnalyticsV2Session;
+      } | null)
+    | ({
+        relationTo: 'analytics-v2-hourly-aggregations';
+        value: string | AnalyticsV2HourlyAggregation;
+      } | null)
+    | ({
+        relationTo: 'analytics-v2-daily-aggregations';
+        value: string | AnalyticsV2DailyAggregation;
+      } | null)
+    | ({
+        relationTo: 'payload-jobs';
+        value: string | PayloadJob;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -299,29 +569,23 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "analytics-events_select".
+ * via the `definition` "analytics-v2-events_select".
  */
-export interface AnalyticsEventsSelect<T extends boolean = true> {
+export interface AnalyticsV2EventsSelect<T extends boolean = true> {
   timestamp?: T;
   session_id?: T;
-  domain?: T;
   path?: T;
   query_params?: T;
-  referrer_url?: T;
-  ip_hash?: T;
-  user_agent?: T;
-  device_type?: T;
-  os?: T;
-  browser?: T;
-  country?: T;
+  event_type?: T;
+  event_data?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "analytics-sessions_select".
+ * via the `definition` "analytics-v2-sessions_select".
  */
-export interface AnalyticsSessionsSelect<T extends boolean = true> {
+export interface AnalyticsV2SessionsSelect<T extends boolean = true> {
   ip_hash?: T;
   domain?: T;
   session_start?: T;
@@ -332,6 +596,7 @@ export interface AnalyticsSessionsSelect<T extends boolean = true> {
   browser?: T;
   country?: T;
   duration?: T;
+  referrer_url?: T;
   utm?:
     | T
     | {
@@ -341,6 +606,74 @@ export interface AnalyticsSessionsSelect<T extends boolean = true> {
         term?: T;
         content?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-v2-hourly-aggregations_select".
+ */
+export interface AnalyticsV2HourlyAggregationsSelect<T extends boolean = true> {
+  date?: T;
+  hour?: T;
+  total_sessions?: T;
+  total_events?: T;
+  unique_visitors?: T;
+  browsers?: T;
+  devices?: T;
+  operating_systems?: T;
+  countries?: T;
+  top_pages?: T;
+  utm_sources?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics-v2-daily-aggregations_select".
+ */
+export interface AnalyticsV2DailyAggregationsSelect<T extends boolean = true> {
+  date?: T;
+  total_sessions?: T;
+  total_events?: T;
+  unique_visitors?: T;
+  browsers?: T;
+  devices?: T;
+  operating_systems?: T;
+  countries?: T;
+  top_pages?: T;
+  utm_sources?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -375,6 +708,30 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskAnalytics-v2_aggregate_hourly".
+ */
+export interface TaskAnalyticsV2AggregateHourly {
+  input?: unknown;
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskAnalytics-v2_aggregate_daily".
+ */
+export interface TaskAnalyticsV2AggregateDaily {
+  input?: unknown;
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskAnalytics-v2_cleanup_aggregations".
+ */
+export interface TaskAnalyticsV2CleanupAggregations {
+  input?: unknown;
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

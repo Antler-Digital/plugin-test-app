@@ -33,6 +33,10 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    autoLogin: {
+      email: 'jack@antler.digital',
+      password: 'Password1!',
+    },
     user: Users.slug,
     livePreview: {
       breakpoints: [

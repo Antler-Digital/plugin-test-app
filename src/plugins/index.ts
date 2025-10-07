@@ -10,9 +10,12 @@ import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
-
+import { PayloadPluginMcp } from 'payload-plugin-mcp'
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
+import { Posts } from '../collections/Posts'
+import { Users } from '../collections/Users'
+import { Pages } from '../collections/Pages'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
@@ -91,4 +94,38 @@ export const plugins: Plugin[] = [
     },
   }),
   payloadCloudPlugin(),
+  PayloadPluginMcp({
+    apiKey: process.env.MCP_API_KEY || '',
+    // collections: 'all', // Expose all collections with default operations
+    collections: [
+      Pages,
+      Posts, // Uses default operations
+      // Users,    // Uses default operations
+      // Collection with custom options
+      {
+        collection: Users,
+        options: {
+          operations: {
+            list: true,
+            get: true,
+            create: true, // Enable creation for users
+            update: true, // Enable updates for users
+            delete: false, // Keep delete disabled
+          },
+          toolPrefix: 'user', // Custom tool prefix
+          description: 'user management', // Custom description
+          excludeFields: ['password'], // Hide sensitive fields
+        },
+      },
+      // Media,    // Uses default operations
+    ],
+    defaultOperations: {
+      list: true,
+      get: true,
+      create: true,
+      update: false,
+      delete: false,
+    },
+    globals: [],
+  }),
 ]
